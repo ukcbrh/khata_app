@@ -4,7 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1e3a8a">
+    <meta name="google-adsense-account" content="ca-pub-6923316799502067">
     <title>Khata Book - Upendra K Chaudhary</title>
+    <script>
+        /* Smart AdSense Loader: Runs on Web Browser (khata.bahibox.com), skips inside Android WebView APK to protect AdSense policy */
+        (function() {
+            var ua = navigator.userAgent || '';
+            var isAndroidWebView = Boolean(window.AppInventor) || (/Android/i.test(ua) && /; wv\)/i.test(ua));
+            window.__IS_ANDROID_APP_VIEW__ = isAndroidWebView;
+            if (!isAndroidWebView) {
+                var adScript = document.createElement('script');
+                adScript.async = true;
+                adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6923316799502067';
+                adScript.crossOrigin = 'anonymous';
+                document.head.appendChild(adScript);
+            }
+        })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
