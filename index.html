@@ -1561,7 +1561,7 @@
     /* =====================================================================
        GOOGLE DRIVE AUTO-BACKUP CONFIGURATION (khata.bahibox.com)
        ===================================================================== */
-    const GOOGLE_CLIENT_ID = '347192827103-s4qn893q6ur9hinnc9ise3nlkpjle3tp.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_ID = '347192827103-s4qn893q6ur9hinnc9lse3nikpj1e3tp.apps.googleusercontent.com';
     const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
     const DRIVE_BACKUP_FILENAME = 'DigitalKhata_AutoBackup.json';
 
@@ -1707,7 +1707,6 @@
     async function executeSilentDriveUpload(showToastAlert = false) {
         if (!driveAutoBackupEnabled || !navigator.onLine) return;
 
-        // If token expired, silently request a new token if client is ready
         if (!googleAccessToken || Date.now() >= googleTokenExpiry - 60000) {
             if (!googleTokenClient) initGoogleIdentityClient();
             if (googleTokenClient) {
