@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3a8a">
     <title>Khata Book - Upendra K Chaudhary</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
-            --primary: #1e40af;
-            --primary-light: #3b82f6;
+            --primary: #1e3a8a;
+            --primary-light: #2563eb;
             --bg: #f1f5f9;
             --card-bg: #ffffff;
             --surface-alt: #f8fafc;
@@ -24,8 +26,8 @@
         }
 
         body.dark-mode {
-            --primary: #3b82f6;
-            --primary-light: #60a5fa;
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
             --bg: #0f172a;
             --card-bg: #1e293b;
             --surface-alt: #0f172a;
@@ -67,16 +69,17 @@
             padding-bottom: 85px;
         }
 
+        /* Solid Royal Blue Header (#1e3a8a) matching Niotron StatusBarColor */
         .app-header {
-            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            background-color: #1e3a8a;
             color: white;
-            padding: 18px 16px 22px;
+            padding: 16px 16px 22px;
             border-bottom-left-radius: 20px;
             border-bottom-right-radius: 20px;
             position: sticky;
             top: 0;
             z-index: 10;
-            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.22);
         }
 
         .header-top {
@@ -84,12 +87,31 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 14px;
+            gap: 8px;
         }
 
         .app-title {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 700;
             letter-spacing: 0.3px;
+        }
+
+        .header-right-badges {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .drive-pill {
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.16);
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.28);
+            white-space: nowrap;
         }
 
         .business-badge {
@@ -97,6 +119,10 @@
             background: rgba(255,255,255,0.2);
             padding: 4px 10px;
             border-radius: 20px;
+            max-width: 130px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .summary-card {
@@ -274,7 +300,7 @@
 
         .btn-stmt {
             background: #eff6ff;
-            color: #1d4ed8;
+            color: #1e3a8a;
         }
 
         .btn-qr {
@@ -370,7 +396,7 @@
         .btn-primary {
             width: 100%;
             padding: 12px;
-            background: var(--primary);
+            background-color: #1e3a8a;
             color: white;
             border: none;
             border-radius: 10px;
@@ -416,7 +442,11 @@
         }
 
         .nav-item.active {
-            color: var(--primary);
+            color: #1e3a8a;
+        }
+
+        body.dark-mode .nav-item.active {
+            color: #60a5fa;
         }
 
         .nav-icon {
@@ -436,7 +466,7 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #2563eb, #1e40af);
+            background-color: #1e3a8a;
             color: white;
             font-size: 30px;
             border: 4px solid var(--bg);
@@ -445,7 +475,7 @@
             justify-content: center;
             position: absolute;
             top: -32px;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 4px 12px rgba(30, 58, 138, 0.4);
             cursor: pointer;
         }
 
@@ -518,7 +548,7 @@
             padding: 2px 6px;
             border-radius: 5px;
             background: #e0e7ff;
-            color: #1e40af;
+            color: #1e3a8a;
             margin-right: 4px;
         }
 
@@ -555,9 +585,9 @@
         }
 
         .preset-chip.active {
-            background: var(--primary);
+            background-color: #1e3a8a;
             color: #ffffff;
-            border-color: var(--primary);
+            border-color: #1e3a8a;
         }
 
         .report-box {
@@ -610,13 +640,13 @@
         }
 
         .toggle-opt-btn.active {
-            background: var(--primary);
+            background-color: #1e3a8a;
             color: #ffffff;
-            border-color: var(--primary);
+            border-color: #1e3a8a;
         }
 
         .thick-arrow-btn {
-            background: #1e40af;
+            background-color: #1e3a8a;
             border: none;
             color: #ffffff;
             width: 38px;
@@ -627,7 +657,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(30, 64, 175, 0.28);
+            box-shadow: 0 2px 6px rgba(30, 58, 138, 0.28);
         }
 
         .thick-arrow-btn:active {
@@ -635,8 +665,8 @@
         }
 
         .ledger-header .thick-arrow-btn {
-            background: rgba(255, 255, 255, 0.24);
-            border: 1.5px solid rgba(255, 255, 255, 0.55);
+            background: rgba(255, 255, 255, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.5);
             box-shadow: none;
         }
 
@@ -657,7 +687,7 @@
         }
 
         .ledger-header {
-            background: #1e40af;
+            background-color: #1e3a8a;
             color: white;
             padding: 14px 16px;
             display: flex;
@@ -779,7 +809,7 @@
 
         .ledger-bottom-panel {
             background: var(--card-bg);
-            border-top: 2px solid var(--primary);
+            border-top: 2px solid #1e3a8a;
             padding: 12px 14px 16px;
             box-shadow: 0 -6px 18px rgba(0,0,0,0.14);
         }
@@ -788,13 +818,12 @@
             display: grid;
             grid-template-columns: 1fr 1fr 1.25fr;
             gap: 8px;
-            background: linear-gradient(135deg, rgba(30, 64, 175, 0.1), rgba(37, 99, 235, 0.16));
-            border: 2px solid var(--primary);
+            background: rgba(30, 58, 138, 0.08);
+            border: 2px solid #1e3a8a;
             padding: 12px 10px;
             border-radius: 12px;
             margin-bottom: 12px;
             text-align: center;
-            box-shadow: 0 3px 10px rgba(30, 64, 175, 0.15);
         }
 
         .ledger-totals-bar > div:not(:last-child) {
@@ -815,7 +844,6 @@
             font-weight: 900;
             margin-top: 4px;
             letter-spacing: -0.3px;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.06);
         }
 
         .ledger-action-btns {
@@ -912,6 +940,57 @@
             flex-shrink: 0;
         }
 
+        /* Center Dialog Pop-up for Google Drive Auto-Backup */
+        .center-popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.72);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 18px;
+            z-index: 200;
+        }
+
+        .center-popup-overlay.open {
+            display: flex;
+        }
+
+        .center-popup-card {
+            background: var(--card-bg);
+            color: var(--text-dark);
+            width: 100%;
+            max-width: 390px;
+            border-radius: 20px;
+            padding: 24px 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.28);
+            border: 1px solid var(--border);
+        }
+
+        .drive-icon-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #eff6ff;
+            color: #1e3a8a;
+            font-size: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px;
+            border: 2px solid #bfdbfe;
+        }
+
+        .drive-status-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
         .qr-container {
             display: flex;
             flex-direction: column;
@@ -943,11 +1022,14 @@
 <body>
 
 <div class="app-shell">
-    <!-- Top Header -->
+    <!-- Top Header (Solid #1e3a8a) -->
     <div class="app-header">
         <div class="header-top">
             <div class="app-title" id="uiAppTitle">📒 Digital Khata Book</div>
-            <div class="business-badge" id="headerBizName">My Business</div>
+            <div class="header-right-badges">
+                <span class="drive-pill" id="headerDriveStatusPill" onclick="openDriveAutoBackupPopup(true)">☁️ Drive Off</span>
+                <div class="business-badge" id="headerBizName">My Business</div>
+            </div>
         </div>
         <div class="summary-card">
             <div class="sum-item">
@@ -1044,6 +1126,23 @@
     </div>
 </div>
 
+<!-- POP-UP MODAL: GOOGLE DRIVE AUTO-BACKUP ON APP START -->
+<div class="center-popup-overlay" id="driveAutoBackupPopup">
+    <div class="center-popup-card">
+        <div class="drive-icon-circle">☁️</div>
+        <h3 style="font-size:18px; font-weight:800; margin-bottom:8px;" id="uiDrivePopupTitle">Enable Google Drive Auto-Backup</h3>
+        <p style="font-size:13px; color:var(--text-muted); line-height:1.5; margin-bottom:16px;" id="uiDrivePopupDesc">
+            Keep your Khata data 100% safe in your own Google Drive. Every entry will backup automatically in the background.
+        </p>
+        <button type="button" class="btn-primary" style="background:#16a34a; margin-bottom:10px; font-size:14px;" id="uiDriveConnectBtn" onclick="connectGoogleDriveAutoBackup()">
+            🔗 Connect Google Drive
+        </button>
+        <button type="button" class="toggle-opt-btn" style="width:100%; font-size:13px;" id="uiDriveLaterBtn" onclick="dismissDriveAutoBackupPopup()">
+            Later (Continue Offline)
+        </button>
+    </div>
+</div>
+
 <!-- FULL PAGE TRANSACTION LEDGER VIEW -->
 <div class="full-page-ledger" id="fullLedgerView">
     <div class="ledger-header">
@@ -1091,7 +1190,7 @@
             <h3 id="uiProdPageTitle">📦 Product & Services</h3>
             <p id="uiProdPageSub">Manage items, rates & stock</p>
         </div>
-        <button class="ledger-share-stmt" id="uiAddProdTopBtn" style="background: #ffffff; color: #1e40af;" onclick="openProductFormModal(false)">+ Add On Product & Service</button>
+        <button class="ledger-share-stmt" id="uiAddProdTopBtn" style="background: #ffffff; color: #1e3a8a;" onclick="openProductFormModal(false)">+ Add On Product & Service</button>
     </div>
 
     <div class="ledger-scroll-area" id="productListContainer"></div>
@@ -1123,7 +1222,7 @@
             <div class="hub-card" onclick="closeModal('plusHubModal'); openUnitSettingsModal();">
                 <div class="hub-card-icon">⚙️</div>
                 <div class="hub-card-title" id="uiHubSetTitle">Settings</div>
-                <div class="hub-card-sub" id="uiHubSetSub">Theme, Language & Units</div>
+                <div class="hub-card-sub" id="uiHubSetSub">Theme, Language & Drive Backup</div>
             </div>
             <div class="hub-card" onclick="closeModal('plusHubModal'); openReportsModal();">
                 <div class="hub-card-icon">📊</div>
@@ -1175,7 +1274,7 @@
     </div>
 </div>
 
-<!-- MODAL: Settings (Theme, Language, JSON Backup/Restore & Unit List) -->
+<!-- MODAL: Settings (Theme, Language, Google Drive Auto-Backup, Manual JSON & Unit List) -->
 <div class="modal-overlay" id="unitSettingsModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1186,6 +1285,17 @@
                 <h3 id="uiSettingsTitle">⚙️ Settings</h3>
             </div>
             <button class="close-btn" onclick="closeModal('unitSettingsModal')">×</button>
+        </div>
+
+        <!-- Google Drive Cloud Auto-Backup Section -->
+        <div class="settings-card-block" style="border-color: #93c5fd;">
+            <label style="font-size:13px; font-weight:800; color:#1e3a8a; display:block; margin-bottom:6px;" id="uiCloudDriveSectionTitle">☁️ Google Drive Auto-Backup</label>
+            <div class="drive-status-box" id="settingsDriveStatusText">Not Connected</div>
+            <div class="toggle-btn-group">
+                <button type="button" class="toggle-opt-btn" style="background:var(--green); color:#fff; border-color:var(--green);" id="uiCloudSyncNowBtn" onclick="syncToGoogleDriveNow()">🔄 Sync Now</button>
+                <button type="button" class="toggle-opt-btn" style="background:#1e3a8a; color:#fff; border-color:#1e3a8a;" id="uiCloudRestoreBtn" onclick="restoreFromGoogleDrive()">☁️ Restore Cloud</button>
+            </div>
+            <button type="button" class="toggle-opt-btn" style="width:100%; margin-top:8px; font-size:12px;" id="uiCloudConnectSwitchBtn" onclick="connectGoogleDriveAutoBackup()">🔗 Connect / Change Google Account</button>
         </div>
 
         <div class="settings-card-block">
@@ -1204,12 +1314,12 @@
             </div>
         </div>
 
-        <!-- JSON Backup & Restore (Google Drive / Mobile Folder Picker) -->
+        <!-- Local File Backup & Restore -->
         <div class="settings-card-block">
-            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;" id="uiBackupRestoreTitle">☁️ Backup & Restore (.json)</label>
+            <label style="font-size:13px; font-weight:700; display:block; margin-bottom:8px;" id="uiBackupRestoreTitle">📁 Local Backup & Restore (.json)</label>
             <div class="toggle-btn-group">
-                <button type="button" class="toggle-opt-btn" style="background:var(--green); color:#fff; border-color:var(--green);" id="uiBackupDriveBtn" onclick="backupToJsonFile()">⬆️ Backup</button>
-                <button type="button" class="toggle-opt-btn" style="background:var(--primary); color:#fff; border-color:var(--primary);" id="uiRestoreDriveBtn" onclick="restoreFromFile()">⬇️ Restore File</button>
+                <button type="button" class="toggle-opt-btn" style="background:var(--green); color:#fff; border-color:var(--green);" id="uiBackupDriveBtn" onclick="backupToJsonFile()">⬆️ Export File</button>
+                <button type="button" class="toggle-opt-btn" style="background:#1e3a8a; color:#fff; border-color:#1e3a8a;" id="uiRestoreDriveBtn" onclick="restoreFromFile()">⬇️ Import File</button>
             </div>
             <button type="button" class="toggle-opt-btn" style="width:100%; margin-top:8px; font-size:12px;" id="uiManualJsonModalBtn" onclick="openManualBackupModal()">📋 Manual Copy / Paste JSON Backup</button>
             <input type="file" id="restoreFilePicker" accept=".json,application/json,text/plain,*/*" class="hidden" onchange="handleRestoreFilePicked(event)">
@@ -1249,7 +1359,7 @@
             <div class="form-group" style="margin-bottom:8px;">
                 <textarea id="jsonRestoreTextArea" class="form-control" rows="4" style="font-family:monospace; font-size:11px; resize:none;" placeholder="Paste backup JSON code here..."></textarea>
             </div>
-            <button type="button" class="btn-primary" style="background:var(--primary);" id="uiPasteRestoreBtn" onclick="restoreFromTextPaste()">📥 Restore from Text</button>
+            <button type="button" class="btn-primary" style="background:#1e3a8a;" id="uiPasteRestoreBtn" onclick="restoreFromTextPaste()">📥 Restore from Text</button>
         </div>
     </div>
 </div>
@@ -1346,7 +1456,7 @@
         <div class="form-group">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                 <label id="uiSelProdLabel" style="margin-bottom:0;">Select Product / Service (Optional)</label>
-                <button type="button" id="uiInlineAddProdBtn" onclick="openProductFormModal(true)" style="background:var(--primary); color:white; border:none; padding:4px 9px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">+ Add New</button>
+                <button type="button" id="uiInlineAddProdBtn" onclick="openProductFormModal(true)" style="background:#1e3a8a; color:white; border:none; padding:4px 9px; border-radius:6px; font-size:11px; font-weight:700; cursor:pointer;">+ Add New</button>
             </div>
             <select id="entryProductSelect" class="form-control" onchange="onTxnProductSelect()">
                 <option value="">-- Direct Amount / None --</option>
@@ -1359,7 +1469,7 @@
         </div>
 
         <div id="entryTimeQtyGroup" style="display:none; background:var(--surface-alt); padding:10px; border-radius:10px; border:1px solid var(--border); margin-bottom:14px;">
-            <label style="display:block; font-size:12px; font-weight:700; color:var(--primary); margin-bottom:6px;" id="uiTimeDurHeader">⏱️ Time Duration (Rate: ₹<span id="hourlyRateDisplay">0</span> / Hour)</label>
+            <label style="display:block; font-size:12px; font-weight:700; color:#1e3a8a; margin-bottom:6px;" id="uiTimeDurHeader">⏱️ Time Duration (Rate: ₹<span id="hourlyRateDisplay">0</span> / Hour)</label>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
                     <label style="font-size:11px; color:var(--text-muted);" id="uiHoursLabel">Hours</label>
@@ -1419,7 +1529,7 @@
         </div>
         <p id="selectedTxnSummary" style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;"></p>
         <div style="display: flex; gap: 10px;">
-            <button class="btn-primary" id="uiEditTxnBtn" style="background: #2563eb;" onclick="triggerEditTxn()">✏️ Edit Transaction</button>
+            <button class="btn-primary" id="uiEditTxnBtn" style="background: #1e3a8a;" onclick="triggerEditTxn()">✏️ Edit Transaction</button>
             <button class="btn-primary" id="uiDelTxnBtn" style="background: var(--red);" onclick="triggerDeleteTxn()">🗑️ Delete Transaction</button>
         </div>
     </div>
@@ -1448,6 +1558,263 @@
 </div>
 
 <script>
+    /* =====================================================================
+       GOOGLE DRIVE AUTO-BACKUP CONFIGURATION (khata.bahibox.com)
+       ===================================================================== */
+    const GOOGLE_CLIENT_ID = '347192827103-s4qn893q6ur9hinnc9ise3nlkpjle3tp.apps.googleusercontent.com';
+    const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+    const DRIVE_BACKUP_FILENAME = 'DigitalKhata_AutoBackup.json';
+
+    let googleTokenClient = null;
+    let googleAccessToken = localStorage.getItem('khata_gdrive_token') || '';
+    let googleTokenExpiry = parseInt(localStorage.getItem('khata_gdrive_expiry') || '0', 10);
+    let driveAutoBackupEnabled = localStorage.getItem('khata_gdrive_enabled') === 'true';
+    let driveLastSyncTime = localStorage.getItem('khata_gdrive_last_sync') || '';
+    let driveBackupFileId = localStorage.getItem('khata_gdrive_file_id') || '';
+    let silentSyncTimer = null;
+    let pendingPostAuthAction = 'sync';
+
+    function updateDriveStatusUI(stateMsg = '') {
+        const pill = document.getElementById('headerDriveStatusPill');
+        const settingsTxt = document.getElementById('settingsDriveStatusText');
+
+        if (stateMsg) {
+            if (pill) pill.innerText = stateMsg;
+            if (settingsTxt) settingsTxt.innerText = stateMsg;
+            return;
+        }
+
+        if (driveAutoBackupEnabled) {
+            const shortTime = driveLastSyncTime ? driveLastSyncTime : 'Active';
+            if (pill) pill.innerText = '☁️ Synced';
+            if (settingsTxt) {
+                settingsTxt.innerHTML = appLang === 'hi'
+                    ? `✅ <b>ऑटो-बैकअप चालू है</b><br>अंतिम सिंक: ${shortTime}`
+                    : `✅ <b>Auto-Backup Enabled</b><br>Last Synced: ${shortTime}`;
+            }
+        } else {
+            if (pill) pill.innerText = appLang === 'hi' ? '☁️ बैकअप बंद' : '☁️ Drive Off';
+            if (settingsTxt) {
+                settingsTxt.innerHTML = appLang === 'hi'
+                    ? '⚠️ Google Drive ऑटो-बैकअप अभी जुड़ा नहीं है।'
+                    : '⚠️ Google Drive Auto-Backup is not connected yet.';
+            }
+        }
+    }
+
+    function initGoogleIdentityClient() {
+        if (window.google && google.accounts && google.accounts.oauth2) {
+            googleTokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_CLIENT_ID,
+                scope: GOOGLE_DRIVE_SCOPE,
+                callback: async (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        googleAccessToken = tokenResponse.access_token;
+                        const expiresInSec = parseInt(tokenResponse.expires_in || '3500', 10);
+                        googleTokenExpiry = Date.now() + (expiresInSec * 1000);
+                        driveAutoBackupEnabled = true;
+
+                        localStorage.setItem('khata_gdrive_token', googleAccessToken);
+                        localStorage.setItem('khata_gdrive_expiry', String(googleTokenExpiry));
+                        localStorage.setItem('khata_gdrive_enabled', 'true');
+
+                        dismissDriveAutoBackupPopup();
+
+                        if (pendingPostAuthAction === 'restore') {
+                            await executeDriveRestore();
+                        } else {
+                            await executeSilentDriveUpload(true);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function openDriveAutoBackupPopup(forceOpen = false) {
+        if (!forceOpen) {
+            const dismissed = localStorage.getItem('khata_gdrive_prompt_dismissed') === 'true';
+            if (driveAutoBackupEnabled || dismissed) return;
+        }
+        document.getElementById('driveAutoBackupPopup').classList.add('open');
+    }
+
+    function dismissDriveAutoBackupPopup() {
+        localStorage.setItem('khata_gdrive_prompt_dismissed', 'true');
+        document.getElementById('driveAutoBackupPopup').classList.remove('open');
+    }
+
+    function connectGoogleDriveAutoBackup() {
+        pendingPostAuthAction = 'sync';
+        if (!googleTokenClient) initGoogleIdentityClient();
+        if (googleTokenClient) {
+            googleTokenClient.requestAccessToken({ prompt: 'consent' });
+        } else {
+            alert(appLang === 'hi'
+                ? 'Google सेवा लोड हो रही है, कृपया 2 सेकंड बाद पुनः प्रयास करें।'
+                : 'Google service is loading, please try again in 2 seconds.');
+        }
+    }
+
+    function syncToGoogleDriveNow() {
+        pendingPostAuthAction = 'sync';
+        if (googleAccessToken && Date.now() < googleTokenExpiry - 60000) {
+            executeSilentDriveUpload(true);
+        } else {
+            if (!googleTokenClient) initGoogleIdentityClient();
+            if (googleTokenClient) {
+                googleTokenClient.requestAccessToken({ prompt: '' });
+            }
+        }
+    }
+
+    function restoreFromGoogleDrive() {
+        pendingPostAuthAction = 'restore';
+        if (googleAccessToken && Date.now() < googleTokenExpiry - 60000) {
+            executeDriveRestore();
+        } else {
+            if (!googleTokenClient) initGoogleIdentityClient();
+            if (googleTokenClient) {
+                googleTokenClient.requestAccessToken({ prompt: 'select_account' });
+            }
+        }
+    }
+
+    function scheduleSilentGoogleDriveBackup() {
+        if (!driveAutoBackupEnabled) return;
+        if (silentSyncTimer) clearTimeout(silentSyncTimer);
+        silentSyncTimer = setTimeout(() => {
+            executeSilentDriveUpload(false);
+        }, 1200);
+    }
+
+    async function findExistingDriveBackupFileId() {
+        if (driveBackupFileId) return driveBackupFileId;
+        const query = encodeURIComponent(`name='${DRIVE_BACKUP_FILENAME}' and trashed=false`);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name,modifiedTime)`, {
+            headers: { Authorization: `Bearer ${googleAccessToken}` }
+        });
+        if (!res.ok) return '';
+        const data = await res.json();
+        if (data.files && data.files.length > 0) {
+            driveBackupFileId = data.files[0].id;
+            localStorage.setItem('khata_gdrive_file_id', driveBackupFileId);
+            return driveBackupFileId;
+        }
+        return '';
+    }
+
+    async function executeSilentDriveUpload(showToastAlert = false) {
+        if (!driveAutoBackupEnabled || !navigator.onLine) return;
+
+        // If token expired, silently request a new token if client is ready
+        if (!googleAccessToken || Date.now() >= googleTokenExpiry - 60000) {
+            if (!googleTokenClient) initGoogleIdentityClient();
+            if (googleTokenClient) {
+                pendingPostAuthAction = 'sync';
+                googleTokenClient.requestAccessToken({ prompt: '' });
+            }
+            return;
+        }
+
+        try {
+            updateDriveStatusUI(appLang === 'hi' ? '☁️ सिंक हो रहा है...' : '☁️ Syncing...');
+            const payloadStr = JSON.stringify(buildFullBackupPayload(), null, 2);
+            const existingId = await findExistingDriveBackupFileId();
+
+            const metadata = {
+                name: DRIVE_BACKUP_FILENAME,
+                mimeType: 'application/json'
+            };
+
+            const boundary = '-------KhataDriveBoundary314159';
+            const delimiter = `\r\n--${boundary}\r\n`;
+            const closeDelim = `\r\n--${boundary}--`;
+
+            const multipartBody =
+                delimiter +
+                'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                JSON.stringify(metadata) +
+                delimiter +
+                'Content-Type: application/json\r\n\r\n' +
+                payloadStr +
+                closeDelim;
+
+            const uploadUrl = existingId
+                ? `https://www.googleapis.com/upload/drive/v3/files/${existingId}?uploadType=multipart`
+                : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+
+            const method = existingId ? 'PATCH' : 'POST';
+
+            const uploadRes = await fetch(uploadUrl, {
+                method: method,
+                headers: {
+                    Authorization: `Bearer ${googleAccessToken}`,
+                    'Content-Type': `multipart/related; boundary="${boundary}"`
+                },
+                body: multipartBody
+            });
+
+            if (uploadRes.ok) {
+                const resJson = await uploadRes.json();
+                if (resJson.id) {
+                    driveBackupFileId = resJson.id;
+                    localStorage.setItem('khata_gdrive_file_id', driveBackupFileId);
+                }
+                const nowStr = new Date().toLocaleTimeString(appLang === 'hi' ? 'hi-IN' : 'en-IN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                driveLastSyncTime = nowStr;
+                localStorage.setItem('khata_gdrive_last_sync', driveLastSyncTime);
+                updateDriveStatusUI();
+
+                if (showToastAlert) {
+                    alert(appLang === 'hi'
+                        ? '✅ Google Drive पर डेटा सफलतापूर्वक बैकअप हो गया!'
+                        : '✅ Data backed up to Google Drive successfully!');
+                }
+            } else {
+                updateDriveStatusUI();
+            }
+        } catch (err) {
+            updateDriveStatusUI();
+        }
+    }
+
+    async function executeDriveRestore() {
+        try {
+            updateDriveStatusUI(appLang === 'hi' ? '☁️ खोजा जा रहा है...' : '☁️ Checking...');
+            const fileId = await findExistingDriveBackupFileId();
+            if (!fileId) {
+                updateDriveStatusUI();
+                alert(appLang === 'hi'
+                    ? 'आपके Google Drive में कोई पुराना बैकअप नहीं मिला।'
+                    : 'No existing backup file found in your Google Drive.');
+                return;
+            }
+
+            const fileRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                headers: { Authorization: `Bearer ${googleAccessToken}` }
+            });
+            if (!fileRes.ok) {
+                updateDriveStatusUI();
+                alert(t('restoreInvalidAlert'));
+                return;
+            }
+
+            const restoredObj = await fileRes.json();
+            updateDriveStatusUI();
+            applyRestoredDataObject(restoredObj);
+        } catch (err) {
+            updateDriveStatusUI();
+            alert(t('restoreInvalidAlert'));
+        }
+    }
+
+    /* =====================================================================
+       I18N DICTIONARY & APP STATE
+       ===================================================================== */
     const I18N = {
         en: {
             appTitle: '📒 Digital Khata Book',
@@ -1489,7 +1856,7 @@
             hubProdTitle: 'Product & Services',
             hubProdSub: 'Items, Price & Stock',
             hubSetTitle: 'Settings',
-            hubSetSub: 'Theme, Language & Units',
+            hubSetSub: 'Theme, Language & Drive Backup',
             hubRepTitle: 'Reports',
             hubRepSub: 'Cash, Bank, Debtor, Creditor',
             addProdModalTitle: '➕ Add Product & Service',
@@ -1513,13 +1880,21 @@
             delShort: '🗑️ Delete',
             fixedUnitBadge: '🔒 Fixed',
             settingsTitle: '⚙️ Settings',
+            drivePopupTitle: 'Enable Google Drive Auto-Backup',
+            drivePopupDesc: 'Keep your Khata data 100% safe in your own Google Drive. Every entry will backup automatically in the background.',
+            driveConnectBtn: '🔗 Connect Google Drive',
+            driveLaterBtn: 'Later (Continue Offline)',
+            cloudDriveSectionTitle: '☁️ Google Drive Auto-Backup',
+            cloudSyncNowBtn: '🔄 Sync Now',
+            cloudRestoreBtn: '☁️ Restore Cloud',
+            cloudConnectSwitchBtn: '🔗 Connect / Change Google Account',
             themeLabel: 'Appearance Mode',
             lightModeBtn: '☀️ Light Mode',
             darkModeBtn: '🌙 Dark Mode',
             langLabel: 'App Language',
-            backupRestoreTitle: '☁️ Backup & Restore (.json)',
-            backupDriveBtn: '⬆️ Backup (Drive / Folder)',
-            restoreDriveBtn: '⬇️ Restore File',
+            backupRestoreTitle: '📁 Local Backup & Restore (.json)',
+            backupDriveBtn: '⬆️ Export File',
+            restoreDriveBtn: '⬇️ Import File',
             manualJsonModalBtn: '📋 Manual Copy / Paste JSON Backup',
             backupModalTitle: '📋 Backup JSON Data',
             backupModalDesc: 'Copy this JSON text and save it in Notepad or Google Drive as a .json file:',
@@ -1688,7 +2063,7 @@
             hubProdTitle: 'प्रोडक्ट और सर्विसेज',
             hubProdSub: 'आइटम, कीमत और स्टॉक',
             hubSetTitle: 'सेटिंग्स',
-            hubSetSub: 'थीम, भाषा और यूनिट लिस्ट',
+            hubSetSub: 'थीम, भाषा और Drive बैकअप',
             hubRepTitle: 'रिपोर्ट्स',
             hubRepSub: 'सभी, कैश, बैंक, देनदार, लेनदार',
             addProdModalTitle: '➕ प्रोडक्ट और सर्विस जोड़ें',
@@ -1712,13 +2087,21 @@
             delShort: '🗑️ डिलीट',
             fixedUnitBadge: '🔒 फिक्स',
             settingsTitle: '⚙️ सेटिंग्स',
+            drivePopupTitle: 'Google Drive ऑटो-बैकअप चालू करें',
+            drivePopupDesc: 'अपने खाता डेटा को अपने ही Google Drive में 100% सुरक्षित रखें। हर एंट्री बैकग्राउंड में अपने आप बैकअप होती रहेगी।',
+            driveConnectBtn: '🔗 Google Drive जोड़ें',
+            driveLaterBtn: 'बाद में (ऑफलाइन जारी रखें)',
+            cloudDriveSectionTitle: '☁️ Google Drive ऑटो-बैकअप',
+            cloudSyncNowBtn: '🔄 अभी सिंक करें',
+            cloudRestoreBtn: '☁️ क्लाउड रिस्टोर',
+            cloudConnectSwitchBtn: '🔗 Google अकाउंट जोड़ें / बदलें',
             themeLabel: 'थीम मोड',
             lightModeBtn: '☀️ लाइट मोड',
             darkModeBtn: '🌙 डार्क मोड',
             langLabel: 'ऐप की भाषा',
-            backupRestoreTitle: '☁️ बैकअप और रिस्टोर (.json)',
-            backupDriveBtn: '⬆️ बैकअप (Drive / Folder)',
-            restoreDriveBtn: '⬇️ फाइल रिस्टोर करें',
+            backupRestoreTitle: '📁 लोकल बैकअप और रिस्टोर (.json)',
+            backupDriveBtn: '⬆️ एक्सपोर्ट फाइल',
+            restoreDriveBtn: '⬇️ इम्पोर्ट फाइल',
             manualJsonModalBtn: '📋 मैनुअल कॉपी / पेस्ट JSON बैकअप',
             backupModalTitle: '📋 बैकअप JSON डेटा',
             backupModalDesc: 'इस JSON टेक्स्ट को कॉपी करके Notepad या Google Drive में .json फाइल बनाकर सेव कर लें:',
@@ -1963,13 +2346,11 @@
     }
 
     async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback) {
-        // 1. If running inside Niotron / Android APK WebView, send file to Android Bridge (opens Save to Drive / Share dialog)
         const sentToNiotron = sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
         if (sentToNiotron) {
             return;
         }
 
-        // 2. Web Share API with File (Works on Android Chrome & modern mobile browsers - supports Save to Drive / WhatsApp / Folder)
         try {
             const blob = base64ToBlob(base64Data, mimeType);
             const fileObj = new File([blob], fileName, { type: mimeType });
@@ -1985,7 +2366,6 @@
             if (err && err.name === 'AbortError') return;
         }
 
-        // 3. Direct File Download Fallback on PC / Mobile Browser
         try {
             const blob = base64ToBlob(base64Data, mimeType);
             const url = URL.createObjectURL(blob);
@@ -2010,7 +2390,7 @@
         return btoa(binary);
     }
 
-    /* Direct .json Backup to Google Drive / Mobile Folder */
+    /* Direct .json Backup Export */
     async function backupToJsonFile() {
         const payload = buildFullBackupPayload();
         const jsonStr = JSON.stringify(payload, null, 2);
@@ -2095,7 +2475,6 @@
     }
 
     function restoreFromFile() {
-        // Trigger standard file picker (works across Android Chrome, Mobile Folder & Google Drive)
         const picker = document.getElementById('restoreFilePicker');
         if (picker) {
             picker.value = '';
@@ -2103,7 +2482,6 @@
         }
     }
 
-    // Callback function that Niotron / Android WebView can call directly with JSON string
     window.receiveRestoredJsonFromAndroid = function(jsonString) {
         try {
             const parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
@@ -2186,6 +2564,17 @@
         document.getElementById('uiTotalGetLabel').innerText = t('totalGet');
         document.getElementById('uiTotalGiveLabel').innerText = t('totalGive');
         document.getElementById('searchInput').placeholder = t('searchPlaceholder');
+
+        document.getElementById('uiDrivePopupTitle').innerText = t('drivePopupTitle');
+        document.getElementById('uiDrivePopupDesc').innerText = t('drivePopupDesc');
+        document.getElementById('uiDriveConnectBtn').innerText = t('driveConnectBtn');
+        document.getElementById('uiDriveLaterBtn').innerText = t('driveLaterBtn');
+
+        document.getElementById('uiCloudDriveSectionTitle').innerText = t('cloudDriveSectionTitle');
+        document.getElementById('uiCloudSyncNowBtn').innerText = t('cloudSyncNowBtn');
+        document.getElementById('uiCloudRestoreBtn').innerText = t('cloudRestoreBtn');
+        document.getElementById('uiCloudConnectSwitchBtn').innerText = t('cloudConnectSwitchBtn');
+        updateDriveStatusUI();
 
         document.getElementById('uiProfileHeading').innerText = t('profileHeading');
         document.getElementById('uiEditProfileBtn').innerText = t('editProfileBtn');
@@ -2347,6 +2736,11 @@
         document.getElementById('profAddress').value = profile.address || '';
         document.getElementById('profUpiId').value = profile.upiId || '';
         applyThemeAndLanguage();
+
+        setTimeout(() => {
+            initGoogleIdentityClient();
+            openDriveAutoBackupPopup(false);
+        }, 900);
     }
 
     function switchTab(tab) {
@@ -2374,6 +2768,7 @@
         document.getElementById('headerBizName').innerText = profile.bizName || t('defaultBiz');
         isProfileSavedState = true;
         renderProfileViewState();
+        scheduleSilentGoogleDriveBackup();
         alert(t('profileSavedAlert'));
     }
 
@@ -2404,6 +2799,7 @@
         localStorage.setItem('khata_units', JSON.stringify(units));
         document.getElementById('newUnitInput').value = '';
         renderUnitList();
+        scheduleSilentGoogleDriveBackup();
     }
 
     function isUnitUsedInProducts(unitName) {
@@ -2433,6 +2829,7 @@
         units.splice(idx, 1);
         localStorage.setItem('khata_units', JSON.stringify(units));
         renderUnitList();
+        scheduleSilentGoogleDriveBackup();
     }
 
     function renderUnitList() {
@@ -2528,6 +2925,7 @@
         }
 
         localStorage.setItem('khata_products', JSON.stringify(products));
+        scheduleSilentGoogleDriveBackup();
         closeModal('productFormModal');
         renderProductList();
 
@@ -2570,6 +2968,7 @@
         if (!confirm(t('delItemConfirm'))) return;
         products = products.filter(p => p.id !== id);
         localStorage.setItem('khata_products', JSON.stringify(products));
+        scheduleSilentGoogleDriveBackup();
         renderProductList();
     }
 
@@ -2808,11 +3207,11 @@
 
             html = `
                 <div style="margin-bottom:14px;">
-                    <div style="font-weight:700; font-size:13px; color:var(--primary); margin-bottom:6px;">💵 ${t('repCash')}</div>
+                    <div style="font-weight:700; font-size:13px; color:#1e3a8a; margin-bottom:6px;">💵 ${t('repCash')}</div>
                     ${cashData.html}
                 </div>
                 <div style="margin-bottom:14px; padding-top:10px; border-top:2px dashed var(--border);">
-                    <div style="font-weight:700; font-size:13px; color:var(--primary); margin-bottom:6px;">🏦 ${t('repBank')}</div>
+                    <div style="font-weight:700; font-size:13px; color:#1e3a8a; margin-bottom:6px;">🏦 ${t('repBank')}</div>
                     ${bankData.html}
                 </div>
                 <div style="margin-bottom:14px; padding-top:10px; border-top:2px dashed var(--border);">
@@ -2866,7 +3265,7 @@
         const margin = 14;
         let y = 16;
 
-        doc.setFillColor(30, 64, 175);
+        doc.setFillColor(30, 58, 138);
         doc.rect(0, 0, pageW, 28, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
@@ -3237,7 +3636,7 @@
                         <span class="txn-datetime">🕒 ${tItem.date} ${modeTag}</span>
                         <div class="txn-card-actions">
                             <button class="txn-share-btn" onclick="event.stopPropagation(); shareSingleTxnWhatsApp(${tItem.id}, ${tItem.runningBal})">${t('shareShort')}</button>
-                            <span style="font-size: 11px; color: var(--primary); font-weight: 600;">${t('editDelHint')}</span>
+                            <span style="font-size: 11px; color: #1e3a8a; font-weight: 600;">${t('editDelHint')}</span>
                         </div>
                     </div>
                     <div class="txn-particular">${tItem.note || (tItem.type === 'gave' ? t('defaultGaveNote') : t('defaultGotNote'))}</div>
@@ -3377,7 +3776,7 @@
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = '#1e40af';
+        ctx.fillStyle = '#1e3a8a';
         ctx.fillRect(0, 0, canvas.width, 105);
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
@@ -3675,7 +4074,7 @@
         document.getElementById('entryPayMode').value = txn.payMode || 'Credit';
         document.getElementById('entryTypeSelectorGroup').style.display = 'block';
         document.getElementById('entryTypeSelect').value = txn.type;
-        document.getElementById('saveTxnBtn').style.background = 'var(--primary)';
+        document.getElementById('saveTxnBtn').style.background = '#1e3a8a';
         document.getElementById('txnEntryModal').classList.add('open');
     }
 
@@ -3750,7 +4149,7 @@
         c.fillStyle = '#ffffff';
         c.fillRect(0, 0, cardCanvas.width, cardCanvas.height);
 
-        c.fillStyle = '#1e40af';
+        c.fillStyle = '#1e3a8a';
         c.fillRect(0, 0, cardCanvas.width, 96);
         c.fillStyle = '#ffffff';
         c.font = 'bold 26px sans-serif';
@@ -3818,6 +4217,7 @@
 
     function saveData() {
         localStorage.setItem('khata_accounts', JSON.stringify(accounts));
+        scheduleSilentGoogleDriveBackup();
     }
 
     init();
