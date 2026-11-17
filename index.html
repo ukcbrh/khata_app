@@ -38,6 +38,14 @@
                 return origOpen ? origOpen.apply(window, arguments) : window;
             };
 
+            /* Prevent hidden <a target="_blank"> or <form target="_blank"> from opening Chrome/about:blank */
+            document.addEventListener('click', function(e) {
+                var el = e.target && e.target.closest ? e.target.closest('a[target="_blank"], form[target="_blank"]') : null;
+                if (el) {
+                    el.removeAttribute('target');
+                }
+            }, true);
+
             if (!isAndroidWebView) {
                 var adScript = document.createElement('script');
                 adScript.async = true;
@@ -1679,39 +1687,33 @@
         document.getElementById('driveAutoBackupPopup').classList.remove('open');
     }
 
-    function connectGoogleDriveAutoBackup() {
-        pendingPostAuthAction = 'sync';
-        if (!googleTokenClient) initGoogleIdentityClient();
-        if (googleTokenClient) {
-            googleTokenClient.requestAccessToken({ prompt: 'consent' });
-        } else {
-            alert(appLang === 'hi'
-                ? 'Google सेवा लोड हो रही है, कृपया 2 सेकंड बाद पुनः प्रयास करें।'
-                : 'Google service is loading, please try again in 2 seconds.');
-        }
+    /* Direct Redirect OAuth (Prevents about:blank & Open with Chrome popup in WebView) */
+    function connectGoogleDriveAutoBackup(actionMode = 'sync') {
+        localStorage.setItem('khata_gdrive_pending_action', actionMode);
+        var redirectUri = window.location.origin + window.location.pathname;
+        var authUrl = 'https://accounts.google.com/o/oauth2/v2/auth'
+            + '?client_id=' + encodeURIComponent(GOOGLE_CLIENT_ID)
+            + '&redirect_uri=' + encodeURIComponent(redirectUri)
+            + '&response_type=token'
+            + '&scope=' + encodeURIComponent(GOOGLE_DRIVE_SCOPE)
+            + '&include_granted_scopes=true'
+            + '&prompt=consent';
+        window.location.href = authUrl;
     }
 
     function syncToGoogleDriveNow() {
-        pendingPostAuthAction = 'sync';
         if (googleAccessToken && Date.now() < googleTokenExpiry - 60000) {
             executeSilentDriveUpload(true);
         } else {
-            if (!googleTokenClient) initGoogleIdentityClient();
-            if (googleTokenClient) {
-                googleTokenClient.requestAccessToken({ prompt: '' });
-            }
+            connectGoogleDriveAutoBackup('sync');
         }
     }
 
     function restoreFromGoogleDrive() {
-        pendingPostAuthAction = 'restore';
         if (googleAccessToken && Date.now() < googleTokenExpiry - 60000) {
             executeDriveRestore();
         } else {
-            if (!googleTokenClient) initGoogleIdentityClient();
-            if (googleTokenClient) {
-                googleTokenClient.requestAccessToken({ prompt: 'select_account' });
-            }
+            connectGoogleDriveAutoBackup('restore');
         }
     }
 
@@ -1743,11 +1745,7 @@
         if (!driveAutoBackupEnabled || !navigator.onLine) return;
 
         if (!googleAccessToken || Date.now() >= googleTokenExpiry - 60000) {
-            if (!googleTokenClient) initGoogleIdentityClient();
-            if (googleTokenClient) {
-                pendingPostAuthAction = 'sync';
-                googleTokenClient.requestAccessToken({ prompt: '' });
-            }
+            updateDriveStatusUI(appLang === 'hi' ? '☁️ पुनः लॉगिन आवश्यक' : '☁️ Reconnect Drive');
             return;
         }
 
@@ -2778,6 +2776,42 @@
         return mode;
     }
 
+    function handleOAuthHashOnStartup() {
+        if (window.location.hash && window.location.hash.indexOf('access_token=') !== -1) {
+            var params = new URLSearchParams(window.location.hash.substring(1));
+            var token = params.get('access_token');
+            var expiresIn = parseInt(params.get('expires_in') || '3500', 10);
+            if (token) {
+                googleAccessToken = token;
+                googleTokenExpiry = Date.now() + (expiresIn * 1000);
+                driveAutoBackupEnabled = true;
+
+                localStorage.setItem('khata_gdrive_token', googleAccessToken);
+                localStorage.setItem('khata_gdrive_expiry', String(googleTokenExpiry));
+                localStorage.setItem('khata_gdrive_enabled', 'true');
+                localStorage.setItem('khata_gdrive_prompt_dismissed', 'true');
+
+                try {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                } catch (e) {}
+
+                var pendingAct = localStorage.getItem('khata_gdrive_pending_action') || 'sync';
+                localStorage.removeItem('khata_gdrive_pending_action');
+
+                setTimeout(function() {
+                    dismissDriveAutoBackupPopup();
+                    if (pendingAct === 'restore') {
+                        executeDriveRestore();
+                    } else {
+                        executeSilentDriveUpload(true);
+                    }
+                }, 600);
+                return true;
+            }
+        }
+        return false;
+    }
+
     function init() {
         document.getElementById('profBizName').value = profile.bizName || '';
         document.getElementById('profPhone').value = profile.phone || '';
@@ -2785,10 +2819,13 @@
         document.getElementById('profUpiId').value = profile.upiId || '';
         applyThemeAndLanguage();
 
-        setTimeout(() => {
-            initGoogleIdentityClient();
-            openDriveAutoBackupPopup(false);
-        }, 900);
+        const handledRedirect = handleOAuthHashOnStartup();
+        if (!handledRedirect) {
+            setTimeout(() => {
+                initGoogleIdentityClient();
+                openDriveAutoBackupPopup(false);
+            }, 900);
+        }
     }
 
     function switchTab(tab) {
