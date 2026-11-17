@@ -7,11 +7,37 @@
     <meta name="google-adsense-account" content="ca-pub-6923316799502067">
     <title>Khata Book - Upendra K Chaudhary</title>
     <script>
-        /* Smart AdSense Loader: Runs on Web Browser (khata.bahibox.com), skips inside Android WebView APK to protect AdSense policy */
+        /* 1. Android WebView Bridge & Anti-about:blank / Anti-Chrome-Popup Guard */
         (function() {
             var ua = navigator.userAgent || '';
-            var isAndroidWebView = Boolean(window.AppInventor) || (/Android/i.test(ua) && /; wv\)/i.test(ua));
+            var isAndroidWebView = Boolean(window.AppInventor) || (/Android/i.test(ua) && (/; wv\)/i.test(ua) || /SM-A366B/i.test(ua)));
             window.__IS_ANDROID_APP_VIEW__ = isAndroidWebView;
+
+            var origOpen = window.open;
+            window.open = function(url, target, features) {
+                if (!url || url === 'about:blank' || String(url).indexOf('javascript:') === 0) {
+                    return window;
+                }
+                var u = String(url);
+                if (u.indexOf('https://wa.me/') === 0) {
+                    var waConverted = u.replace('https://wa.me/', 'whatsapp://send?phone=').replace('?text=', '&text=');
+                    if (waConverted.indexOf('whatsapp://send?phone=?') === 0) {
+                        waConverted = waConverted.replace('whatsapp://send?phone=?', 'whatsapp://send?');
+                    }
+                    window.location.href = waConverted;
+                    return window;
+                }
+                if (u.indexOf('whatsapp://') === 0 || u.indexOf('upi://') === 0) {
+                    window.location.href = u;
+                    return window;
+                }
+                if (isAndroidWebView) {
+                    window.location.href = u;
+                    return window;
+                }
+                return origOpen ? origOpen.apply(window, arguments) : window;
+            };
+
             if (!isAndroidWebView) {
                 var adScript = document.createElement('script');
                 adScript.async = true;
@@ -1137,6 +1163,7 @@
     </div>
 </div>
 
+<!-- POP-UP MODAL: GOOGLE DRIVE AUTO-BACKUP ON APP START -->
 <div class="center-popup-overlay" id="driveAutoBackupPopup">
     <div class="center-popup-card">
         <div class="drive-icon-circle">☁️</div>
@@ -1153,6 +1180,7 @@
     </div>
 </div>
 
+<!-- FULL PAGE TRANSACTION LEDGER VIEW -->
 <div class="full-page-ledger" id="fullLedgerView">
     <div class="ledger-header">
         <button type="button" class="thick-arrow-btn" onclick="closeFullLedger()" aria-label="Back">
@@ -1189,6 +1217,7 @@
     </div>
 </div>
 
+<!-- FULL PAGE PRODUCT & SERVICES LIST VIEW -->
 <div class="full-page-ledger" id="fullProductPageView">
     <div class="ledger-header">
         <button type="button" class="thick-arrow-btn" onclick="closeFullProductPage()" aria-label="Back">
@@ -1204,6 +1233,7 @@
     <div class="ledger-scroll-area" id="productListContainer"></div>
 </div>
 
+<!-- PLUS HUB MODAL -->
 <div class="modal-overlay" id="plusHubModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1240,6 +1270,7 @@
     </div>
 </div>
 
+<!-- MODAL: Add / Edit Product & Services Form -->
 <div class="modal-overlay" id="productFormModal" style="z-index: 140;">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1280,6 +1311,7 @@
     </div>
 </div>
 
+<!-- MODAL: Settings -->
 <div class="modal-overlay" id="unitSettingsModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1340,6 +1372,7 @@
     </div>
 </div>
 
+<!-- MODAL: JSON Backup Text Copy & Paste Restore Modal -->
 <div class="modal-overlay" id="jsonBackupModal" style="z-index: 150;">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1366,6 +1399,7 @@
     </div>
 </div>
 
+<!-- MODAL: Reports -->
 <div class="modal-overlay" id="reportsModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1413,6 +1447,7 @@
     </div>
 </div>
 
+<!-- MODAL 1: Add / Edit Account Form -->
 <div class="modal-overlay" id="addAccountModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1440,6 +1475,7 @@
     </div>
 </div>
 
+<!-- MODAL 2: Add / Edit Transaction Modal -->
 <div class="modal-overlay" id="txnEntryModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1514,6 +1550,7 @@
     </div>
 </div>
 
+<!-- MODAL 3: Transaction Action Menu -->
 <div class="modal-overlay" id="txnActionModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -1533,6 +1570,7 @@
     </div>
 </div>
 
+<!-- MODAL 4: Dynamic UPI QR Code -->
 <div class="modal-overlay" id="qrModal">
     <div class="modal-sheet">
         <div class="modal-header">
@@ -2316,47 +2354,39 @@
     }
 
     /* Universal Android WebView / Niotron & Browser File/Share Helper */
-    function isInsideAndroidApp() {
-        return Boolean(window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') || Boolean(window.__IS_ANDROID_APP_VIEW__);
-    }
-
-    function openWhatsAppSafely(phoneDigits, messageText) {
-        const cleanPhone = (phoneDigits || '').replace(/\D/g, '');
-        const encoded = encodeURIComponent(messageText || '');
-        if (isInsideAndroidApp()) {
-            const schemeUrl = cleanPhone
-                ? `whatsapp://send?phone=${cleanPhone}&text=${encoded}`
-                : `whatsapp://send?text=${encoded}`;
-            window.location.href = schemeUrl;
-        } else {
-            const webUrl = cleanPhone
-                ? `https://wa.me/${cleanPhone}?text=${encoded}`
-                : `https://wa.me/?text=${encoded}`;
-            window.open(webUrl, '_blank');
-        }
-    }
-
     function sendToAndroidBridge(actionType, fileName, mimeType, base64Data, plainTextFallback) {
         try {
             if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-                const cleanB64 = String(base64Data || '').replace(/^data:[^;]+;base64,/, '').replace(/\s+/g, '');
-                if (!cleanB64) return false;
                 window.AppInventor.setWebViewString(JSON.stringify({
                     action: actionType,
                     fileName: fileName,
                     mimeType: mimeType,
-                    base64: cleanB64,
+                    base64: base64Data,
                     text: plainTextFallback || ''
                 }));
                 return true;
             }
         } catch (e) {}
-        return false;
+        return Boolean(window.__IS_ANDROID_APP_VIEW__);
+    }
+
+    function openWhatsAppDirect(phoneDigits, messageText) {
+        var encoded = encodeURIComponent(messageText);
+        if (window.__IS_ANDROID_APP_VIEW__) {
+            var waUri = phoneDigits
+                ? 'whatsapp://send?phone=' + phoneDigits + '&text=' + encoded
+                : 'whatsapp://send?text=' + encoded;
+            window.location.href = waUri;
+        } else {
+            var webWa = phoneDigits
+                ? 'https://wa.me/' + phoneDigits + '?text=' + encoded
+                : 'https://wa.me/?text=' + encoded;
+            window.open(webWa, '_blank');
+        }
     }
 
     function base64ToBlob(base64, mimeType) {
-        const cleanB64 = String(base64 || '').replace(/^data:[^;]+;base64,/, '');
-        const byteChars = atob(cleanB64);
+        const byteChars = atob(base64);
         const byteNumbers = new Array(byteChars.length);
         for (let i = 0; i < byteChars.length; i++) {
             byteNumbers[i] = byteChars.charCodeAt(i);
@@ -2364,7 +2394,7 @@
         return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
     }
 
-    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, phoneForWaFallback) {
+    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback) {
         const sentToNiotron = sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
         if (sentToNiotron) {
             return;
@@ -2397,11 +2427,7 @@
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }, 1500);
-        } catch (e) {
-            if (shareText) {
-                openWhatsAppSafely(phoneForWaFallback || '', shareText);
-            }
-        }
+        } catch (e) {}
     }
 
     function encodeUtf8ToBase64(str) {
@@ -2413,58 +2439,6 @@
         return btoa(binary);
     }
 
-    /* Reliable Synchronous QR Code Canvas Generator */
-    function generateQrCanvasSync(qrText, sizePx = 200) {
-        return new Promise((resolve) => {
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'fixed';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '-9999px';
-            document.body.appendChild(tempDiv);
-
-            new QRCode(tempDiv, {
-                text: qrText,
-                width: sizePx,
-                height: sizePx,
-                colorDark: "#0f172a",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            setTimeout(() => {
-                const canvasEl = tempDiv.querySelector('canvas');
-                const imgEl = tempDiv.querySelector('img');
-                if (canvasEl && canvasEl.width > 0) {
-                    const cloned = document.createElement('canvas');
-                    cloned.width = sizePx;
-                    cloned.height = sizePx;
-                    cloned.getContext('2d').drawImage(canvasEl, 0, 0, sizePx, sizePx);
-                    document.body.removeChild(tempDiv);
-                    resolve(cloned);
-                } else if (imgEl && imgEl.src) {
-                    const loaderImg = new Image();
-                    loaderImg.onload = () => {
-                        const cloned = document.createElement('canvas');
-                        cloned.width = sizePx;
-                        cloned.height = sizePx;
-                        cloned.getContext('2d').drawImage(loaderImg, 0, 0, sizePx, sizePx);
-                        document.body.removeChild(tempDiv);
-                        resolve(cloned);
-                    };
-                    loaderImg.onerror = () => {
-                        document.body.removeChild(tempDiv);
-                        resolve(null);
-                    };
-                    loaderImg.src = imgEl.src;
-                } else {
-                    document.body.removeChild(tempDiv);
-                    resolve(null);
-                }
-            }, 90);
-        });
-    }
-
-    /* Direct .json Backup Export */
     async function backupToJsonFile() {
         const payload = buildFullBackupPayload();
         const jsonStr = JSON.stringify(payload, null, 2);
@@ -2846,12 +2820,10 @@
         alert(t('profileSavedAlert'));
     }
 
-    /* PLUS HUB */
     function openPlusHubModal() {
         document.getElementById('plusHubModal').classList.add('open');
     }
 
-    /* SETTINGS: UNIT LIST */
     function openUnitSettingsModal() {
         document.getElementById('newUnitInput').value = '';
         applyThemeAndLanguage();
@@ -2926,7 +2898,6 @@
         }).join('');
     }
 
-    /* FULL PAGE PRODUCT & SERVICES */
     function openFullProductPage() {
         renderProductList();
         document.getElementById('fullProductPageView').classList.add('open');
@@ -3070,7 +3041,6 @@
         }).join('');
     }
 
-    /* REPORTS */
     function formatLocalIsoDate(d) {
         const yyyy = d.getFullYear();
         const mm = String(d.getMonth() + 1).padStart(2, '0');
@@ -3464,11 +3434,10 @@
             const safeName = `Khata_Report_${repType}_${formatLocalIsoDate(new Date())}.pdf`;
             await shareOrDownloadGeneratedFile(safeName, 'application/pdf', pdfB64, 'Business Report PDF', lastGeneratedReportText, '');
         } else {
-            openWhatsAppSafely('', lastGeneratedReportText);
+            openWhatsAppDirect('', lastGeneratedReportText);
         }
     }
 
-    /* ACCOUNTS */
     function openAddAccountModal() {
         editingAccountId = null;
         document.getElementById('accountModalTitle').innerText = t('addAccModalTitle');
@@ -3627,7 +3596,6 @@
         });
     }
 
-    /* FULL PAGE LEDGER LOGIC */
     function openFullLedger(id) {
         activeAccountId = id;
         const acc = accounts.find(a => a.id === id);
@@ -3732,7 +3700,6 @@
         }).join('');
     }
 
-    /* SHARE FULL STATEMENT AS PDF */
     async function shareFullStatementWhatsApp() {
         const acc = accounts.find(a => a.id === activeAccountId);
         if (!acc) return;
@@ -3807,13 +3774,12 @@
         if (pdfB64) {
             const cleanCustomer = acc.name.replace(/[^a-zA-Z0-9]/g, '_') || 'Customer';
             const fileName = `Statement_${cleanCustomer}_${formatLocalIsoDate(new Date())}.pdf`;
-            await shareOrDownloadGeneratedFile(fileName, 'application/pdf', pdfB64, `${acc.name} Account Statement`, msg, phone);
+            await shareOrDownloadGeneratedFile(fileName, 'application/pdf', pdfB64, `${acc.name} Account Statement`, msg, '');
         } else {
-            openWhatsAppSafely(phone, msg);
+            openWhatsAppDirect(phone, msg);
         }
     }
 
-    /* SHARE SINGLE TRANSACTION BILL AS IMAGE WITH QR CODE */
     async function shareSingleTxnWhatsApp(txnId, runningBalAfterTxn) {
         const acc = accounts.find(a => a.id === activeAccountId);
         if (!acc) return;
@@ -3827,14 +3793,22 @@
 
         let qrCanvas = null;
         if (hasUpi) {
+            const tempDiv = document.createElement('div');
             const upiUrl = `upi://pay?pa=${encodeURIComponent(profile.upiId)}&pn=${encodeURIComponent(bizLabel)}&am=${payAmount.toFixed(2)}&cu=INR`;
-            qrCanvas = await generateQrCanvasSync(upiUrl, 180);
+            new QRCode(tempDiv, {
+                text: upiUrl,
+                width: 180,
+                height: 180,
+                colorDark: "#0f172a",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+            qrCanvas = tempDiv.querySelector('canvas');
         }
 
-        const showQrBlock = Boolean(hasUpi && qrCanvas);
         const canvas = document.createElement('canvas');
         canvas.width = 600;
-        canvas.height = showQrBlock ? 840 : 560;
+        canvas.height = hasUpi ? 840 : 560;
         const ctx = canvas.getContext('2d');
 
         ctx.fillStyle = '#ffffff';
@@ -3897,7 +3871,7 @@
         ctx.fillStyle = '#1e3a8a';
         ctx.fillText(netLabel, 54, 400);
 
-        if (showQrBlock) {
+        if (hasUpi && qrCanvas) {
             ctx.textAlign = 'center';
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 19px sans-serif';
@@ -3917,18 +3891,14 @@
         ctx.font = '15px sans-serif';
         ctx.fillText('Digital Khata Book - Thank You!', 300, canvas.height - 28);
 
-        let phone = (acc.phone || '').replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone;
-
         const pngBase64 = canvas.toDataURL('image/png').split(',')[1];
         const cleanCust = acc.name.replace(/[^a-zA-Z0-9]/g, '_') || 'Customer';
         const fileName = `Bill_${cleanCust}_${String(txn.id).slice(-6)}.png`;
         const shareText = `Bill Receipt - ${bizLabel} | Customer: ${acc.name} | Amount: Rs. ${txn.amount}`;
 
-        await shareOrDownloadGeneratedFile(fileName, 'image/png', pngBase64, 'Bill Receipt', shareText, phone);
+        await shareOrDownloadGeneratedFile(fileName, 'image/png', pngBase64, 'Bill Receipt', shareText, '');
     }
 
-    /* TRANSACTION ENTRY MODAL */
     function populateTxnProductDropdown(selectedProdId = '') {
         const sel = document.getElementById('entryProductSelect');
         sel.innerHTML = `<option value="">${t('directAmtOpt')}</option>` + 
@@ -4199,13 +4169,14 @@
     }
 
     async function shareQrCodeImage() {
+        const qrBox = document.getElementById('qrcode-box');
         const ctxData = window._currentQrContext || {};
         const bizLabel = ctxData.bizLabel || profile.bizName || 'My Business';
         const custName = ctxData.customerName || 'Customer';
         const amt = ctxData.amount || 0;
-        const upiUrl = ctxData.upiUrl || `upi://pay?pa=${encodeURIComponent(profile.upiId || '')}&pn=${encodeURIComponent(bizLabel)}&am=${Number(amt).toFixed(2)}&cu=INR`;
 
-        const qrCanvas = await generateQrCanvasSync(upiUrl, 270);
+        const sourceCanvas = qrBox.querySelector('canvas');
+        const sourceImg = qrBox.querySelector('img');
 
         const cardCanvas = document.createElement('canvas');
         cardCanvas.width = 540;
@@ -4236,8 +4207,10 @@
         c.lineWidth = 3;
         c.strokeRect(120, 215, 300, 300);
 
-        if (qrCanvas) {
-            c.drawImage(qrCanvas, 135, 230, 270, 270);
+        if (sourceCanvas) {
+            c.drawImage(sourceCanvas, 135, 230, 270, 270);
+        } else if (sourceImg) {
+            c.drawImage(sourceImg, 135, 230, 270, 270);
         }
 
         c.fillStyle = '#334155';
@@ -4251,12 +4224,10 @@
         const pngDataUrl = cardCanvas.toDataURL('image/png');
         const pngBase64 = pngDataUrl.split(',')[1];
 
-        let phone = (ctxData.phone || '').replace(/\D/g, '');
-        if (phone.length === 10) phone = '91' + phone;
-        const shareText = `*UPI Payment QR - ${bizLabel}*\nCustomer: ${custName}\nAmount: Rs. ${Number(amt).toLocaleString('en-IN')}\nUPI ID: ${profile.upiId || ''}\nPay Link: ${upiUrl}`;
+        const shareText = `*UPI Payment QR - ${bizLabel}*\nCustomer: ${custName}\nAmount: Rs. ${Number(amt).toLocaleString('en-IN')}\nUPI ID: ${profile.upiId || ''}\nPay Link: ${ctxData.upiUrl || ''}`;
 
         const cleanCust = custName.replace(/[^a-zA-Z0-9]/g, '_') || 'Customer';
-        await shareOrDownloadGeneratedFile(`UPI_QR_${cleanCust}.png`, 'image/png', pngBase64, 'UPI Payment QR Code', shareText, phone);
+        await shareOrDownloadGeneratedFile(`UPI_QR_${cleanCust}.png`, 'image/png', pngBase64, 'UPI Payment QR Code', shareText, '');
     }
 
     function sendReminder(id, amount) {
@@ -4274,7 +4245,7 @@
 
         const message = `${acc.name},\n${t('waReminderIntro')} *${bizLabel}*${bizAddrLine}.\n${t('waReminderDue')} *₹${amount.toLocaleString('en-IN')}*.${payLinkText}\n\n${t('waThankYou')}`;
 
-        openWhatsAppSafely(phone, message);
+        openWhatsAppDirect(phone, message);
     }
 
     function saveData() {
