@@ -1601,6 +1601,22 @@
 
 <script>
     /* =====================================================================
+       NON-BLOCKING TOAST NOTIFICATION (Prevents WebView Freeze after Sync)
+       ===================================================================== */
+    function showNonBlockingToast(msgText, isError = false) {
+        var existing = document.getElementById('khataToastBanner');
+        if (existing) existing.remove();
+        var div = document.createElement('div');
+        div.id = 'khataToastBanner';
+        div.innerText = msgText;
+        div.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:' + (isError ? '#dc2626' : '#15803d') + ';color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:700;z-index:9999;box-shadow:0 4px 14px rgba(0,0,0,0.28);max-width:90%;text-align:center;pointer-events:none;';
+        document.body.appendChild(div);
+        setTimeout(function() {
+            if (div && div.parentNode) div.parentNode.removeChild(div);
+        }, 3000);
+    }
+
+    /* =====================================================================
        GOOGLE DRIVE AUTO-BACKUP CONFIGURATION (khata.bahibox.com)
        ===================================================================== */
     const GOOGLE_CLIENT_ID = '347192827103-s4qn893q6ur9hinnc9lse3nikpj1e3tp.apps.googleusercontent.com';
@@ -1655,7 +1671,6 @@
         document.getElementById('driveAutoBackupPopup').classList.remove('open');
     }
 
-    /* Direct Redirect OAuth (Prevents about:blank & Open with Chrome popup in WebView) */
     function connectGoogleDriveAutoBackup(actionMode = 'sync') {
         localStorage.setItem('khata_gdrive_pending_action', actionMode);
         var redirectUri = window.location.origin + window.location.pathname;
@@ -1770,7 +1785,7 @@
                 updateDriveStatusUI();
 
                 if (showToastAlert) {
-                    alert(appLang === 'hi'
+                    showNonBlockingToast(appLang === 'hi'
                         ? '✅ Google Drive पर डेटा सफलतापूर्वक बैकअप हो गया!'
                         : '✅ Data backed up to Google Drive successfully!');
                 }
@@ -1788,9 +1803,9 @@
             const fileId = await findExistingDriveBackupFileId();
             if (!fileId) {
                 updateDriveStatusUI();
-                alert(appLang === 'hi'
+                showNonBlockingToast(appLang === 'hi'
                     ? 'आपके Google Drive में कोई पुराना बैकअप नहीं मिला।'
-                    : 'No existing backup file found in your Google Drive.');
+                    : 'No existing backup file found in your Google Drive.', true);
                 return;
             }
 
@@ -1799,16 +1814,16 @@
             });
             if (!fileRes.ok) {
                 updateDriveStatusUI();
-                alert(t('restoreInvalidAlert'));
+                showNonBlockingToast(t('restoreInvalidAlert'), true);
                 return;
             }
 
             const restoredObj = await fileRes.json();
             updateDriveStatusUI();
-            applyRestoredDataObject(restoredObj);
+            applyRestoredDataObject(restoredObj, true);
         } catch (err) {
             updateDriveStatusUI();
-            alert(t('restoreInvalidAlert'));
+            showNonBlockingToast(t('restoreInvalidAlert'), true);
         }
     }
 
@@ -2436,34 +2451,34 @@
         textarea.setSelectionRange(0, 999999);
         try {
             navigator.clipboard.writeText(textarea.value);
-            alert(t('jsonCopiedAlert'));
+            showNonBlockingToast(t('jsonCopiedAlert'));
         } catch (e) {
             document.execCommand('copy');
-            alert(t('jsonCopiedAlert'));
+            showNonBlockingToast(t('jsonCopiedAlert'));
         }
     }
 
     function restoreFromTextPaste() {
         const text = document.getElementById('jsonRestoreTextArea').value.trim();
         if (!text) {
-            alert(t('restoreInvalidAlert'));
+            showNonBlockingToast(t('restoreInvalidAlert'), true);
             return;
         }
         try {
             const parsed = JSON.parse(text);
             closeModal('jsonBackupModal');
-            applyRestoredDataObject(parsed);
+            applyRestoredDataObject(parsed, false);
         } catch (err) {
-            alert(t('restoreInvalidAlert'));
+            showNonBlockingToast(t('restoreInvalidAlert'), true);
         }
     }
 
-    function applyRestoredDataObject(data) {
+    function applyRestoredDataObject(data, skipConfirm = false) {
         if (!data || !Array.isArray(data.accounts)) {
-            alert(t('restoreInvalidAlert'));
+            showNonBlockingToast(t('restoreInvalidAlert'), true);
             return;
         }
-        if (!confirm(t('restoreConfirmPrompt'))) return;
+        if (!skipConfirm && !confirm(t('restoreConfirmPrompt'))) return;
 
         accounts = data.accounts || [];
         if (data.profile) {
@@ -2485,7 +2500,7 @@
         }
         saveData();
         applyThemeAndLanguage();
-        alert(t('restoreSuccessAlert'));
+        showNonBlockingToast(t('restoreSuccessAlert'));
     }
 
     function restoreFromFile() {
@@ -2499,9 +2514,9 @@
     window.receiveRestoredJsonFromAndroid = function(jsonString) {
         try {
             const parsed = typeof jsonString === 'string' ? JSON.parse(jsonString) : jsonString;
-            applyRestoredDataObject(parsed);
+            applyRestoredDataObject(parsed, true);
         } catch (err) {
-            alert(t('restoreInvalidAlert'));
+            showNonBlockingToast(t('restoreInvalidAlert'), true);
         }
     };
 
@@ -2513,9 +2528,9 @@
             try {
                 const rawText = (e.target.result || '').replace(/^\uFEFF/, '').trim();
                 const parsed = JSON.parse(rawText);
-                applyRestoredDataObject(parsed);
+                applyRestoredDataObject(parsed, false);
             } catch (err) {
-                alert(t('restoreInvalidAlert'));
+                showNonBlockingToast(t('restoreInvalidAlert'), true);
             }
         };
         reader.readAsText(file, 'UTF-8');
@@ -2821,7 +2836,7 @@
         isProfileSavedState = true;
         renderProfileViewState();
         scheduleSilentGoogleDriveBackup();
-        alert(t('profileSavedAlert'));
+        showNonBlockingToast(t('profileSavedAlert'));
     }
 
     function openPlusHubModal() {
@@ -2838,11 +2853,11 @@
     function addUnit() {
         const val = document.getElementById('newUnitInput').value.trim();
         if (!val) {
-            alert(t('enterUnitAlert'));
+            showNonBlockingToast(t('enterUnitAlert'), true);
             return;
         }
         if (isFixedHourUnit(val) || units.some(u => u.toLowerCase() === val.toLowerCase())) {
-            alert(t('unitExistsAlert'));
+            showNonBlockingToast(t('unitExistsAlert'), true);
             return;
         }
         units.push(val);
@@ -2868,11 +2883,11 @@
     function deleteUnit(idx) {
         const targetUnit = units[idx];
         if (isFixedHourUnit(targetUnit)) {
-            alert(t('fixedHourUnitAlert'));
+            showNonBlockingToast(t('fixedHourUnitAlert'), true);
             return;
         }
         if (isUnitUsedInProducts(targetUnit)) {
-            alert(t('unitInUseAlert'));
+            showNonBlockingToast(t('unitInUseAlert'), true);
             return;
         }
         if (!confirm(`${t('delUnitConfirm')} "${formatDisplayUnit(targetUnit)}"?`)) return;
@@ -2894,7 +2909,7 @@
                 <div class="sub-list-item">
                     <div class="sub-list-info"><h4>${formatDisplayUnit(u)}</h4></div>
                     ${locked
-                        ? `<span class="acc-mini-btn btn-unit-fixed" onclick="alert(t('fixedHourUnitAlert'))">${t('fixedUnitBadge')}</span>`
+                        ? `<span class="acc-mini-btn btn-unit-fixed" onclick="showNonBlockingToast(t('fixedHourUnitAlert'), true)">${t('fixedUnitBadge')}</span>`
                         : `<button class="acc-mini-btn btn-acc-del" onclick="deleteUnit(${i})">${t('delShort')}</button>`
                     }
                 </div>
@@ -2944,7 +2959,7 @@
         const stock = type === 'Product' ? (parseFloat(document.getElementById('prodStock').value) || 0) : 0;
 
         if (!name || isNaN(price) || price < 0) {
-            alert(t('prodInvalidAlert'));
+            showNonBlockingToast(t('prodInvalidAlert'), true);
             return;
         }
 
@@ -3011,7 +3026,7 @@
 
     function deleteProduct(id) {
         if (isProductUsedInTransactions(id)) {
-            alert(t('productInUseAlert'));
+            showNonBlockingToast(t('productInUseAlert'), true);
             return;
         }
         if (!confirm(t('delItemConfirm'))) return;
@@ -3474,7 +3489,7 @@
         const address = document.getElementById('accAddress').value.trim();
 
         if (!name || !phone) {
-            alert(t('accReqAlert'));
+            showNonBlockingToast(t('accReqAlert'), true);
             return;
         }
 
@@ -3506,7 +3521,7 @@
         const acc = accounts.find(a => a.id === id);
         if (!acc) return;
         if (Array.isArray(acc.transactions) && acc.transactions.length > 0) {
-            alert(t('accountInUseAlert'));
+            showNonBlockingToast(t('accountInUseAlert'), true);
             return;
         }
         if (!confirm(`${t('delAccConfirmPrefix')} "${acc.name}" ${t('delAccConfirmSuffix')}`)) return;
@@ -3997,7 +4012,7 @@
         const prodId = document.getElementById('entryProductSelect').value;
 
         if (!amount || amount <= 0) {
-            alert(t('validAmtAlert'));
+            showNonBlockingToast(t('validAmtAlert'), true);
             return;
         }
 
@@ -4137,7 +4152,7 @@
 
     function openQR(id, amount) {
         if (!profile.upiId) {
-            alert(t('setUpiAlert'));
+            showNonBlockingToast(t('setUpiAlert'), true);
             switchTab('profile');
             return;
         }
