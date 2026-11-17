@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="theme-color" content="#1e3a8a">
     <meta name="google-adsense-account" content="ca-pub-6923316799502067">
-    <title>Khata Book - Upendra K Chaudhary</title>
+    <title>Digital Khata Book</title>
     <script>
         /* 1. Android WebView Bridge & Anti-about:blank / Anti-Chrome-Popup Guard */
         (function() {
@@ -57,7 +57,6 @@
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         :root {
             --primary: #1e3a8a;
@@ -1608,14 +1607,12 @@
     const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
     const DRIVE_BACKUP_FILENAME = 'DigitalKhata_AutoBackup.json';
 
-    let googleTokenClient = null;
     let googleAccessToken = localStorage.getItem('khata_gdrive_token') || '';
     let googleTokenExpiry = parseInt(localStorage.getItem('khata_gdrive_expiry') || '0', 10);
     let driveAutoBackupEnabled = localStorage.getItem('khata_gdrive_enabled') === 'true';
     let driveLastSyncTime = localStorage.getItem('khata_gdrive_last_sync') || '';
     let driveBackupFileId = localStorage.getItem('khata_gdrive_file_id') || '';
     let silentSyncTimer = null;
-    let pendingPostAuthAction = 'sync';
 
     function updateDriveStatusUI(stateMsg = '') {
         const pill = document.getElementById('headerDriveStatusPill');
@@ -1642,35 +1639,6 @@
                     ? '⚠️ Google Drive ऑटो-बैकअप अभी जुड़ा नहीं है।'
                     : '⚠️ Google Drive Auto-Backup is not connected yet.';
             }
-        }
-    }
-
-    function initGoogleIdentityClient() {
-        if (window.google && google.accounts && google.accounts.oauth2) {
-            googleTokenClient = google.accounts.oauth2.initTokenClient({
-                client_id: GOOGLE_CLIENT_ID,
-                scope: GOOGLE_DRIVE_SCOPE,
-                callback: async (tokenResponse) => {
-                    if (tokenResponse && tokenResponse.access_token) {
-                        googleAccessToken = tokenResponse.access_token;
-                        const expiresInSec = parseInt(tokenResponse.expires_in || '3500', 10);
-                        googleTokenExpiry = Date.now() + (expiresInSec * 1000);
-                        driveAutoBackupEnabled = true;
-
-                        localStorage.setItem('khata_gdrive_token', googleAccessToken);
-                        localStorage.setItem('khata_gdrive_expiry', String(googleTokenExpiry));
-                        localStorage.setItem('khata_gdrive_enabled', 'true');
-
-                        dismissDriveAutoBackupPopup();
-
-                        if (pendingPostAuthAction === 'restore') {
-                            await executeDriveRestore();
-                        } else {
-                            await executeSilentDriveUpload(true);
-                        }
-                    }
-                }
-            });
         }
     }
 
@@ -2822,7 +2790,6 @@
         const handledRedirect = handleOAuthHashOnStartup();
         if (!handledRedirect) {
             setTimeout(() => {
-                initGoogleIdentityClient();
                 openDriveAutoBackupPopup(false);
             }, 900);
         }
