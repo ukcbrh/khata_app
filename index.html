@@ -2370,19 +2370,26 @@
 
     /* Universal Android WebView / Niotron & Browser File/Share Helper */
     function sendToAndroidBridge(actionType, fileName, mimeType, base64Data, plainTextFallback) {
+        var payloadStr = JSON.stringify({
+            action: actionType,
+            fileName: fileName,
+            mimeType: mimeType,
+            base64: base64Data,
+            text: plainTextFallback || ''
+        });
         try {
             if (window.AppInventor && typeof window.AppInventor.setWebViewString === 'function') {
-                window.AppInventor.setWebViewString(JSON.stringify({
-                    action: actionType,
-                    fileName: fileName,
-                    mimeType: mimeType,
-                    base64: base64Data,
-                    text: plainTextFallback || ''
-                }));
+                window.AppInventor.setWebViewString(payloadStr);
                 return true;
             }
         } catch (e) {}
-        return Boolean(window.__IS_ANDROID_APP_VIEW__);
+        try {
+            if (window.Niotron && typeof window.Niotron.setWebViewString === 'function') {
+                window.Niotron.setWebViewString(payloadStr);
+                return true;
+            }
+        } catch (e) {}
+        return false;
     }
 
     function openWhatsAppDirect(phoneDigits, messageText) {
@@ -2432,6 +2439,7 @@
         const item = window.__lastGeneratedFile;
         if (!item) return;
 
+        // 1. Try native Web Share API with actual file (works on modern Android WebView & Chrome)
         try {
             const blob = base64ToBlob(item.base64Data, item.mimeType);
             const fileObj = new File([blob], item.fileName, { type: item.mimeType });
@@ -2447,27 +2455,34 @@
             if (err && err.name === 'AbortError') return;
         }
 
+        // 2. Try native bridge if available
         const bridged = sendToAndroidBridge('SHARE_OR_SAVE_FILE', item.fileName, item.mimeType, item.base64Data, item.shareText);
-        if (!bridged && item.shareText) {
-            openWhatsAppDirect('', item.shareText);
+        if (bridged) return;
+
+        // 3. Guaranteed fallback for Android WebView: open WhatsApp / Intent with message & UPI link
+        if (item.shareText) {
+            openWhatsAppDirect(item.phoneDigits || '', item.shareText);
+        } else {
+            openWhatsAppDirect('', item.shareTitle + ' - ' + item.fileName);
         }
     }
 
     /* Step 1: Download / Save First, Then Make Sharing Ready */
-    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback) {
+    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback, phoneDigits) {
         window.__lastGeneratedFile = {
             fileName: fileName,
             mimeType: mimeType,
             base64Data: base64Data,
             shareTitle: shareTitle,
-            shareText: shareText || ''
+            shareText: shareText || '',
+            phoneDigits: phoneDigits || ''
         };
 
-        if (!window.__IS_ANDROID_APP_VIEW__) {
-            triggerBrowserDownload(fileName, mimeType, base64Data);
-        } else {
-            sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
-        }
+        // Always trigger standard browser/WebView download first
+        triggerBrowserDownload(fileName, mimeType, base64Data);
+
+        // Also notify native bridge if present
+        sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
 
         showDownloadedShareBanner(fileName);
     }
@@ -3854,7 +3869,7 @@
         if (pdfB64) {
             const cleanCustomer = acc.name.replace(/[^a-zA-Z0-9]/g, '_') || 'Customer';
             const fileName = `Statement_${cleanCustomer}_${formatLocalIsoDate(new Date())}.pdf`;
-            await shareOrDownloadGeneratedFile(fileName, 'application/pdf', pdfB64, `${acc.name} Account Statement`, msg, '');
+            await shareOrDownloadGeneratedFile(fileName, 'application/pdf', pdfB64, `${acc.name} Account Statement`, msg, '', phone);
         } else {
             openWhatsAppDirect(phone, msg);
         }
@@ -3976,7 +3991,9 @@
         const fileName = `Bill_${cleanCust}_${String(txn.id).slice(-6)}.png`;
         const shareText = `Bill Receipt - ${bizLabel} | Customer: ${acc.name} | Amount: Rs. ${txn.amount}`;
 
-        await shareOrDownloadGeneratedFile(fileName, 'image/png', pngBase64, 'Bill Receipt', shareText, '');
+        let custPhone = (acc.phone || '').replace(/\D/g, '');
+        if (custPhone.length === 10) custPhone = '91' + custPhone;
+        await shareOrDownloadGeneratedFile(fileName, 'image/png', pngBase64, 'Bill Receipt', shareText, '', custPhone);
     }
 
     function populateTxnProductDropdown(selectedProdId = '') {
