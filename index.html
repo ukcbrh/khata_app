@@ -1616,6 +1616,40 @@
         }, 3000);
     }
 
+    function showDownloadedShareBanner(fileName) {
+        var existing = document.getElementById('khataDownloadShareBar');
+        if (existing) existing.remove();
+
+        var bar = document.createElement('div');
+        bar.id = 'khataDownloadShareBar';
+        bar.style.cssText = 'position:fixed;top:14px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 14px;border-radius:12px;font-size:12px;font-weight:700;z-index:10000;box-shadow:0 6px 18px rgba(0,0,0,0.35);max-width:94%;width:420px;display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(255,255,255,0.2);';
+
+        var label = document.createElement('span');
+        label.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;';
+        label.innerText = (appLang === 'hi' ? '⬇️ डाउनलोड तैयार: ' : '⬇️ Downloaded: ') + fileName;
+
+        var shareBtn = document.createElement('button');
+        shareBtn.type = 'button';
+        shareBtn.innerText = appLang === 'hi' ? '📤 शेयर करें' : '📤 Share';
+        shareBtn.style.cssText = 'background:#16a34a;color:#fff;border:none;padding:6px 11px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;';
+        shareBtn.onclick = function() {
+            triggerShareForLastGeneratedFile();
+        };
+
+        var closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.innerText = '×';
+        closeBtn.style.cssText = 'background:transparent;color:#cbd5e1;border:none;font-size:16px;font-weight:700;cursor:pointer;padding:0 4px;flex-shrink:0;';
+        closeBtn.onclick = function() {
+            if (bar && bar.parentNode) bar.parentNode.removeChild(bar);
+        };
+
+        bar.appendChild(label);
+        bar.appendChild(shareBtn);
+        bar.appendChild(closeBtn);
+        document.body.appendChild(bar);
+    }
+
     /* =====================================================================
        GOOGLE DRIVE AUTO-BACKUP CONFIGURATION (khata.bahibox.com)
        ===================================================================== */
@@ -2375,27 +2409,7 @@
         return new Blob([new Uint8Array(byteNumbers)], { type: mimeType });
     }
 
-    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback) {
-        const sentToNiotron = sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
-        if (sentToNiotron) {
-            return;
-        }
-
-        try {
-            const blob = base64ToBlob(base64Data, mimeType);
-            const fileObj = new File([blob], fileName, { type: mimeType });
-            if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
-                await navigator.share({
-                    title: shareTitle,
-                    text: shareText,
-                    files: [fileObj]
-                });
-                return;
-            }
-        } catch (err) {
-            if (err && err.name === 'AbortError') return;
-        }
-
+    function triggerBrowserDownload(fileName, mimeType, base64Data) {
         try {
             const blob = base64ToBlob(base64Data, mimeType);
             const url = URL.createObjectURL(blob);
@@ -2405,10 +2419,57 @@
             document.body.appendChild(a);
             a.click();
             setTimeout(() => {
-                document.body.removeChild(a);
+                if (a && a.parentNode) document.body.removeChild(a);
                 URL.revokeObjectURL(url);
             }, 1500);
-        } catch (e) {}
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function triggerShareForLastGeneratedFile() {
+        const item = window.__lastGeneratedFile;
+        if (!item) return;
+
+        try {
+            const blob = base64ToBlob(item.base64Data, item.mimeType);
+            const fileObj = new File([blob], item.fileName, { type: item.mimeType });
+            if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+                await navigator.share({
+                    title: item.shareTitle,
+                    text: item.shareText,
+                    files: [fileObj]
+                });
+                return;
+            }
+        } catch (err) {
+            if (err && err.name === 'AbortError') return;
+        }
+
+        const bridged = sendToAndroidBridge('SHARE_OR_SAVE_FILE', item.fileName, item.mimeType, item.base64Data, item.shareText);
+        if (!bridged && item.shareText) {
+            openWhatsAppDirect('', item.shareText);
+        }
+    }
+
+    /* Step 1: Download / Save First, Then Make Sharing Ready */
+    async function shareOrDownloadGeneratedFile(fileName, mimeType, base64Data, shareTitle, shareText, whatsappUrlFallback) {
+        window.__lastGeneratedFile = {
+            fileName: fileName,
+            mimeType: mimeType,
+            base64Data: base64Data,
+            shareTitle: shareTitle,
+            shareText: shareText || ''
+        };
+
+        if (!window.__IS_ANDROID_APP_VIEW__) {
+            triggerBrowserDownload(fileName, mimeType, base64Data);
+        } else {
+            sendToAndroidBridge('SHARE_OR_SAVE_FILE', fileName, mimeType, base64Data, shareText);
+        }
+
+        showDownloadedShareBanner(fileName);
     }
 
     function encodeUtf8ToBase64(str) {
