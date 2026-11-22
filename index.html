@@ -1117,7 +1117,18 @@
             } catch (err) {
                 if (err && err.name === 'AbortError') return;
             }
-            window.location.href = 'https://khata-bridge.local/share?file=' + encodeURIComponent(item.fileName);
+            try {
+                var iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = 'https://khata-bridge.local/share?file=' + encodeURIComponent(item.fileName);
+                document.body.appendChild(iframe);
+                setTimeout(function() {
+                    if (iframe && iframe.parentNode) iframe.parentNode.removeChild(iframe);
+                }, 1200);
+            } catch (e) {}
+            setTimeout(function() {
+                shareFileViaWebShareOrFallback(item);
+            }, 250);
             return;
         }
 
