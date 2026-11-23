@@ -1061,17 +1061,10 @@
 
     function openWhatsAppDirect(phoneDigits, messageText) {
         var encoded = encodeURIComponent(messageText);
-        if (window.__IS_ANDROID_APP_VIEW__) {
-            var waUri = phoneDigits
-                ? 'whatsapp://send?phone=' + phoneDigits + '&text=' + encoded
-                : 'whatsapp://send?text=' + encoded;
-            window.location.href = waUri;
-        } else {
-            var webWa = phoneDigits
-                ? 'https://wa.me/' + phoneDigits + '?text=' + encoded
-                : 'https://wa.me/?text=' + encoded;
-            window.open(webWa, '_blank');
-        }
+        var webWa = phoneDigits
+            ? 'https://api.whatsapp.com/send?phone=' + phoneDigits + '&text=' + encoded
+            : 'https://api.whatsapp.com/send?text=' + encoded;
+        window.location.href = webWa;
     }
 
     async function shareFileViaWebShareOrFallback(item) {
